@@ -90,6 +90,7 @@ const handler = async (
     const maxNumValidators =
         paraApi.consts.nomineeElection.maxNumValidators.toJSON()
     const coefficients = await paraApi.query.nomineeElection.coefficients()
+    const vv = await paraApi.query.nomineeElection.validators()
 
     const stashes = (await relayApi.derive.staking.stashes()).map((v) =>
         v.toString()
@@ -168,7 +169,11 @@ const handler = async (
             score: v.score || 0,
         }))
 
-    await paraApi.tx.nomineeElection.setValidators(result).signAsync(account)
+    await (
+        await paraApi.tx.nomineeElection
+            .setValidators(result)
+            .signAsync(account)
+    ).send()
 }
 
 const { relayWs, paraWs, seed } = program.opts()

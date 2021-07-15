@@ -1,0 +1,40 @@
+{
+    "APP_NAME": "Parallel Dapp",
+    "DEVELOPMENT_KEYRING": true,
+    "RPC": {
+        "oracle": {
+            "getValue": {
+                "description": "Retrieves the oracle value for a given key.",
+                "params": [
+                    {
+                        "name": "providerId",
+                        "type": "RpcDataProviderId"
+                    },
+                    {
+                        "name": "key",
+                        "type": "OracleKey"
+                    }
+                ],
+                "type": "Option<TimestampedValue>",
+                "isSubscription": false,
+                "jsonrpc": "oracle_getValue",
+                "method": "getValue",
+                "section": "oracle"
+            },
+            "getAllValues": {
+                "description": "Retrieves all oracle values.",
+                "params": [
+                    {
+                        "name": "providerId",
+                        "type": "RpcDataProviderId"
+                    }
+                ],
+                "type": "Vec<(OracleKey, Option<TimestampedValue>)>",
+                "isSubscription": false,
+                "jsonrpc": "oracle_getAllValues",
+                "method": "getAllValues",
+                "section": "oracle"
+            }
+        }
+    }
+}

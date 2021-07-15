@@ -1,18 +1,25 @@
 import { Command } from 'commander'
-import { ApiPromise, WsProvider } from '@polkadot/api'
-import types from './config/types.json'
+import { connect } from './api'
 import type { EraIndex, ValidatorPrefs } from '@polkadot/types/interfaces'
 import type {
     DeriveEraPoints,
     DeriveEraPrefs,
+    DeriveEraSlashes,
     DeriveStakingAccount,
 } from '@polkadot/api-derive/types'
-import type { ValidatorInfo, ValidatorIdentity } from './model'
+import type {
+    ValidatorInfo,
+    ValidatorIdentity,
+    NomineeScoreCoefficients,
+} from './model'
 import { orderBy } from 'lodash'
 import { identity } from '@polkadot/types/interfaces/definitions'
 import BN from 'bn.js'
+import { ApiPromise, Keyring } from '@polkadot/api'
+import { KeyringPair } from '@polkadot/keyring/types'
 
 const program = new Command()
+const commissionRateDecimal = 1e9
 
 program
     .name('nominate-client')
@@ -20,156 +27,158 @@ program
     .option(
         '-p, --para-ws <string>',
         'The Parachain API endpoint to connect to.',
-        'wss://testnet-rpc.parallel.fi'
+        'ws://127.0.0.1:9944'
     )
     .option(
         '-r, --relay-ws <string>',
         'The Relaychain API endpoint to connect to.',
         'wss://kusama-rpc.polkadot.io'
     )
-    .option('-s, --seed <string>', 'The account seed to use')
+    .option('-s, --seed <string>', 'The account seed to use', '//Eve')
 
 program.parse()
 
-const options = program.opts()
+const calculateAvgEraPoints = (
+    address: string,
+    erasPointss: DeriveEraPoints[]
+): number => {
+    return erasPointss.reduce(
+        (ite, cur) => ite + cur.validators[address]?.toNumber() || 0,
+        0
+    )
+}
 
-;(async () => {
-    const provider = new WsProvider(options.relayWs)
-    const api = await ApiPromise.create({ provider })
+const calculateAvgEraPointsOfAll = (erasPointss: DeriveEraPoints[]): number => {
+    return erasPointss.reduce(
+        (ite, cur) => ite + cur.eraPoints.toNumber() || 0,
+        0
+    )
+}
 
-    // current validators
-    // const validators = await api.derive.staking.validators()
-    // const overview = await api.derive.staking.overview()
-    // console.log(validators.validators.map((x) => x.toJSON()).length)
+const calculateValidatorScore = (
+    v: ValidatorInfo,
+    slashes: DeriveEraSlashes[],
+    coefficients: any
+): number => {
+    const r = v.identity.hasIdentity && !v.blocked && v.identity.display ? 1 : 0
+    const cr = v.commissionRate
+    const { crf, epf, nf } = coefficients
 
-    // all validators' stashes accounts
-    const stashes = (await api.derive.staking.stashes()).map((x) =>
-        x.toString()
+    const n = v.nomination
+    if (n === 0) {
+        // ignore new registered validators
+        return 0
+    }
+
+    const eep = v.avgEraPoints
+    const eepa = v.avgEraPointsOfAll
+
+    const sr = slashes.some((s) => s.validators[v.accountId]?.toNumber() > 0)
+        ? 0
+        : 1
+
+    return Math.round(
+        r * (crf * (1 - cr) + nf * (1 / n) * (epf * (eep / eepa))) * sr
+    )
+}
+
+const handler = async (
+    account: KeyringPair,
+    relayApi: ApiPromise,
+    paraApi: ApiPromise
+) => {
+    const maxNumValidators =
+        paraApi.consts.nomineeElection.maxNumValidators.toJSON()
+    const coefficients = await paraApi.query.nomineeElection.coefficients()
+
+    const stashes = (await relayApi.derive.staking.stashes()).map((v) =>
+        v.toString()
     )
 
     const identities = (
-        await api.derive.accounts.hasIdentityMulti(stashes)
+        await relayApi.derive.accounts.hasIdentityMulti(stashes)
     ).map((identity) => ({
         display: identity.display?.toString(),
         hasIdentity: identity.hasIdentity,
     }))
 
-    // commission rate
     let validators: ValidatorInfo[] = (
-        await api.derive.staking.accounts(stashes)
-    )
-        .map((sa, idx) => {
-            return {
-                accountId: sa.accountId.toString(),
-                stashId: sa.stashId.toString(),
-                controllerId: sa.controllerId.toString(),
-                // nominators: sa.nominators.map((x) => x.toJSON()),
-                commissionRate: sa.validatorPrefs.commission.toNumber() / 1e9,
-                blocked: sa.validatorPrefs.blocked.toJSON(),
-                identity: identities[idx],
-            }
-        })
-        // Testing
-        .filter(
-            (v) => v.identity.hasIdentity && v.identity.display && !v.blocked
-        )
+        await relayApi.derive.staking.accounts(stashes)
+    ).map((sa, idx) => {
+        return {
+            accountId: sa.accountId.toString(),
+            stashId: sa.stashId.toString(),
+            controllerId: sa.controllerId.toString(),
+            commissionRate:
+                sa.validatorPrefs.commission.toNumber() / commissionRateDecimal,
+            blocked: sa.validatorPrefs.blocked.toJSON(),
+            identity: identities[idx],
+        }
+    })
 
-    const currentEra = await api.query.staking.currentEra()
-    const allEras = await api.derive.staking?.erasHistoric(false)
-    const weekEras = allEras.slice(-28)
+    const allEras = await relayApi.derive.staking?.erasHistoric(false)
+    const monthEras = allEras.slice(-28)
+
     const slashes = await Promise.all(
-        weekEras.map(async (eraIndex) => {
-            return await api.derive.staking.eraSlashes(eraIndex)
+        monthEras.map(async (eraIndex) => {
+            return await relayApi.derive.staking.eraSlashes(eraIndex)
         })
     )
 
-    // todo switch to api.derive.staking.erasPointss
-    const erasPointss = await api.derive.staking._erasPoints(weekEras, false)
-
-    const calculateAvgEraPoints = (
-        address: string,
-        erasPointss: DeriveEraPoints[]
-    ): number => {
-        return erasPointss.reduce(
-            (ite, cur) => ite + cur.validators[address]?.toNumber() || 0,
-            0
-        )
-    }
-
-    const calculateAvgEraPointsOfAll = (
-        erasPointss: DeriveEraPoints[]
-    ): number => {
-        return erasPointss.reduce(
-            (ite, cur) => ite + cur.eraPoints.toNumber() || 0,
-            0
-        )
-    }
+    const erasPointss = await relayApi.derive.staking._erasPoints(
+        monthEras,
+        false
+    )
 
     validators = await Promise.all(
         validators.map(async (v) => {
-            let nomination = (
-                await api.derive.staking.query(v.stashId, {
-                    withExposure: true,
-                })
-            ).exposure.total
-                .toBn()
-                .div(new BN(1e12))
-                .toNumber()
+            let nomination = Math.round(
+                (
+                    await relayApi.derive.staking.query(v.stashId, {
+                        withExposure: true,
+                    })
+                ).exposure.total
+                    .toBn()
+                    .div(new BN(1e12))
+                    .toNumber()
+            )
 
             return {
                 ...v,
-                // todo polkadot should be using 1e10
                 nomination,
                 avgEraPoints:
                     calculateAvgEraPoints(v.accountId, erasPointss) /
-                    weekEras.length,
-                AvgEraPointsOfAll:
-                    calculateAvgEraPointsOfAll(erasPointss) / weekEras.length,
+                    monthEras.length,
+                avgEraPointsOfAll:
+                    calculateAvgEraPointsOfAll(erasPointss) / monthEras.length,
             }
         })
     )
 
-    const calculateValidatorScore = (v: ValidatorInfo): number => {
-        const r =
-            v.identity.hasIdentity && !v.blocked && v.identity.display ? 1 : 0
-        const cr = v.commissionRate
-
-        const n = v.nomination
-        if (n === 0) {
-            return 0
-        }
-        const eep = v.avgEraPoints
-        const eepa = v.AvgEraPointsOfAll
-        const c0 = 1e6
-        const c1 = 1e2
-        const c2 = 1
-        const sr = slashes.some(
-            (s) => s.validators[v.accountId]?.toNumber() > 0
-        )
-            ? 0
-            : 1
-
-        return r * (c0 * (1 - cr)) * (c1 * (1 / n)) * (c2 * (eep / eepa)) * sr
-    }
-
-    // https://docs.parallel.fi/dev/staking/staking-election
     validators = validators.map((v) => ({
         ...v,
-        score: calculateValidatorScore(v),
+        score: calculateValidatorScore(v, slashes, coefficients.toJSON()),
     }))
 
-    const goodValidators = orderBy(validators, ['score']).slice(-16)
-    console.log(goodValidators)
+    const result = orderBy(validators, ['score'])
+        .slice(-maxNumValidators)
+        .map((v) => ({
+            accountId: v.accountId,
+            stakes: v.nomination || 0,
+            score: v.score || 0,
+        }))
 
-    // console.log(
-    //     erasPoints.map((x) => ({
-    //         era: x.era.toJSON(),
-    //         validators: x.validators,
-    //         erasPoints: x.eraPoints.toJSON(),
-    //     }))
-    // )
+    await paraApi.tx.nomineeElection.setValidators(result).signAsync(account)
+}
 
-    // const nominators = await api.query.staking.nominators.entries()
-    // console.log(nominators.map((x) => x.map((y) => y.toJSON())))
-    // const currentPoints = await api.derive.staking.currentPoints()
+const { relayWs, paraWs, seed } = program.opts()
+;(async () => {
+    const { relayApi, paraApi } = await connect(relayWs, paraWs)
+
+    const keyring = new Keyring({ type: 'sr25519' })
+    const account = keyring.addFromMnemonic(seed)
+
+    relayApi.query.staking.currentEra(async () => {
+        await handler(account, relayApi, paraApi)
+    })
 })()

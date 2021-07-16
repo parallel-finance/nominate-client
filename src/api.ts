@@ -1,7 +1,6 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc'
-import { types, typesAlias } from './config/types.json'
-import { RPC } from './config/rpc.json'
+import { rpc, types, typesAlias } from './config/types.json'
 
 export const connect = async (relayWs: string, paraWs: string) => {
     const relayApi = await ApiPromise.create({
@@ -12,7 +11,7 @@ export const connect = async (relayWs: string, paraWs: string) => {
         provider: new WsProvider(paraWs),
         types,
         typesAlias,
-        rpc: { ...jsonrpc, ...RPC },
+        rpc: { ...jsonrpc, ...rpc },
     })
 
     return { relayApi, paraApi }

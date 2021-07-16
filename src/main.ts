@@ -87,8 +87,7 @@ const handler = async (
     relayApi: ApiPromise,
     paraApi: ApiPromise
 ) => {
-    const maxNumValidators =
-        paraApi.consts.nomineeElection.maxNumValidators.toJSON()
+    const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
     const coefficients = await paraApi.query.nomineeElection.coefficients()
     const vv = await paraApi.query.nomineeElection.validators()
 
@@ -162,7 +161,7 @@ const handler = async (
     }))
 
     const result = orderBy(validators, ['score'])
-        .slice(-maxNumValidators)
+        .slice(-maxValidators)
         .map((v) => ({
             accountId: v.accountId,
             stakes: v.nomination || 0,

@@ -9,10 +9,27 @@ import { orderBy } from 'lodash'
 import BN from 'bn.js'
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
+import winston from 'winston'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
 const relayNativeTokenDecimal = 1e12
+
+const logger = winston.createLogger({
+	level: 'info',
+	transports: [
+		new winston.transports.Console({
+			format: winston.format.combine(
+				winston.format.colorize(),
+				winston.format.simple()
+			)
+		}),
+		new winston.transports.File({
+			filename: 'errors.log',
+			level: 'error'
+		})
+	]
+})
 
 program
 	.name('nominate-client')
@@ -81,7 +98,9 @@ const handler = async (
 	paraApi: ApiPromise
 ) => {
 	const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
-	const coefficients = await paraApi.query.nomineeElection.coefficients()
+	const coefficients = (
+		await paraApi.query.nomineeElection.coefficients()
+	).toJSON()
 
 	const stashes = (await relayApi.derive.staking.stashes()).map((v) =>
 		v.toString()
@@ -132,9 +151,9 @@ const handler = async (
 
 			const nominationBN = exposure.total.toBn().sub(exposure.own.toBn())
 
-			const nomination = Math.round(
-				nominationBN.div(new BN(relayNativeTokenDecimal)).toNumber()
-			)
+			const nomination = nominationBN
+				.div(new BN(relayNativeTokenDecimal))
+				.toNumber()
 
 			return {
 				...v,
@@ -151,10 +170,10 @@ const handler = async (
 
 	validators = validators.map((v) => ({
 		...v,
-		score: calculateValidatorScore(v, slashes, coefficients.toJSON())
+		score: calculateValidatorScore(v, slashes, coefficients)
 	}))
 
-	const result = orderBy(validators, ['score'])
+	const result = orderBy(validators, ['score', 'stakes'], ['desc', 'asc'])
 		.slice(-maxValidators)
 		.map((v) => ({
 			name: v.identity.display,
@@ -163,21 +182,30 @@ const handler = async (
 			score: v.score || 0
 		}))
 
-	await (
-		await paraApi.tx.nomineeElection
-			.setValidators(result)
-			.signAsync(account)
-	).send()
+	const tx = await paraApi.tx.nomineeElection
+		.setValidators(result)
+		.signAsync(account)
+
+	await tx.send()
 }
 
 const { relayWs, paraWs, seed } = program.opts()
 ;(async () => {
-	const { relayApi, paraApi } = await connect(relayWs, paraWs)
+	try {
+		logger.info(`initializing connection to relaychain: ${relayWs}`)
+		logger.info(`initializing connection to parachain: ${paraWs}`)
 
-	const keyring = new Keyring({ type: 'sr25519' })
-	const account = keyring.addFromMnemonic(seed)
+		const { relayApi, paraApi } = await connect(relayWs, paraWs)
 
-	relayApi.query.staking.currentEra(async () => {
-		await handler(account, relayApi, paraApi)
-	})
+		const keyring = new Keyring({ type: 'sr25519' })
+		const account = keyring.addFromMnemonic(seed)
+		logger.info(`feeder: ${account.address}`)
+
+		relayApi.query.staking.currentEra(async (era) => {
+			logger.info(`era index: ${era.toString()}`)
+			await handler(account, relayApi, paraApi)
+		})
+	} catch (err) {
+		logger.error(`error happened: ${err.message}`)
+	}
 })()

@@ -13,6 +13,7 @@
 	"author": "Parallel Team",
 	"license": "ISC",
 	"devDependencies": {
+		"@types/inquirer": "^7.3.3",
 		"@types/lodash": "^4.14.171",
 		"@typescript-eslint/eslint-plugin": "^4.28.3",
 		"@typescript-eslint/parser": "^4.28.3",
@@ -31,6 +32,7 @@
 		"@polkadot/keyring": "^7.0.1",
 		"@polkadot/types": "^5.0.1",
 		"@polkadot/util": "^7.0.1",
+		"@polkadot/util-crypto": "^7.0.1",
 		"commander": "^8.0.0",
 		"inquirer": "^8.1.2",
 		"lodash": "^4.17.21",

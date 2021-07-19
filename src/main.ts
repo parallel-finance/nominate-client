@@ -9,7 +9,9 @@ import { orderBy } from 'lodash'
 import BN from 'bn.js'
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 import winston from 'winston'
+import inquirer from 'inquirer'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
@@ -45,6 +47,7 @@ program
 		'wss://kusama-rpc.polkadot.io'
 	)
 	.option('-s, --seed <string>', 'The account seed to use', '//Eve')
+	.option('-i, --interactive [boolean]', 'Input seed interactively', false)
 
 program.parse()
 
@@ -200,17 +203,31 @@ const handler = async (
 	await tx.send()
 }
 
-const { relayWs, paraWs, seed } = program.opts()
+const { relayWs, paraWs, seed, interactive } = program.opts()
 ;(async () => {
 	try {
+		await cryptoWaitReady()
+
+		const keyring = new Keyring({ type: 'sr25519' })
+		const account = keyring.addFromMnemonic(
+			interactive
+				? (
+						await inquirer.prompt<any>([
+							{
+								type: 'password',
+								name: 'seed',
+								message: 'Input your seed'
+							}
+						])
+				  ).seed
+				: seed
+		)
+
+		logger.info(`feeder: ${account.address}`)
 		logger.info(`initializing connection to relaychain: ${relayWs}`)
 		logger.info(`initializing connection to parachain: ${paraWs}`)
 
 		const { relayApi, paraApi } = await connect(relayWs, paraWs)
-
-		const keyring = new Keyring({ type: 'sr25519' })
-		const account = keyring.addFromMnemonic(seed)
-		logger.info(`feeder: ${account.address}`)
 
 		relayApi.query.staking.currentEra(async (era) => {
 			logger.info(`era index: ${era.toString()}`)

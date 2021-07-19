@@ -177,6 +177,7 @@ const handler = async (
 		})
 	)
 
+	logger.info(`calculating validators' scores...`)
 	validators = validators.map((v) => ({
 		...v,
 		score: calculateValidatorScore(v, slashes, coefficients)
@@ -191,6 +192,7 @@ const handler = async (
 			score: v.score || 0
 		}))
 
+	logger.info(`submitting selected validators...`)
 	const tx = await paraApi.tx.nomineeElection
 		.setValidators(result)
 		.signAsync(account)

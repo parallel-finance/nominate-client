@@ -102,10 +102,18 @@ const handler = async (
 		await paraApi.query.nomineeElection.coefficients()
 	).toJSON()
 
+	logger.info(
+		`maxValidators: ${maxValidators}, Coefficients: ${JSON.stringify(
+			coefficients
+		)}`
+	)
+
+	logger.info(`retrieving stash accounts of all validators...`)
 	const stashes = (await relayApi.derive.staking.stashes()).map((v) =>
 		v.toString()
 	)
 
+	logger.info(`retrieving identities of all validators...`)
 	const identities = (
 		await relayApi.derive.accounts.hasIdentityMulti(stashes)
 	).map((identity) => ({
@@ -115,17 +123,15 @@ const handler = async (
 
 	let validators: ValidatorInfo[] = (
 		await relayApi.derive.staking.accounts(stashes)
-	).map((sa, idx) => {
-		return {
-			accountId: sa.accountId.toString(),
-			stashId: sa.stashId.toString(),
-			controllerId: sa.controllerId.toString(),
-			commissionRate:
-				sa.validatorPrefs.commission.toNumber() / commissionRateDecimal,
-			blocked: sa.validatorPrefs.blocked.toJSON(),
-			identity: identities[idx]
-		}
-	})
+	).map((sa, idx) => ({
+		accountId: sa.accountId.toString(),
+		stashId: sa.stashId.toString(),
+		controllerId: sa.controllerId.toString(),
+		commissionRate:
+			sa.validatorPrefs.commission.toNumber() / commissionRateDecimal,
+		blocked: sa.validatorPrefs.blocked.toJSON(),
+		identity: identities[idx]
+	}))
 
 	const allEras = await relayApi.derive.staking?.erasHistoric(false)
 	const monthEras = allEras.slice(-28)

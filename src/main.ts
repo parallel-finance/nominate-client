@@ -136,6 +136,7 @@ const handler = async (
 		})
 	)
 
+	// TODO don't use internal function
 	const erasPointss = await relayApi.derive.staking._erasPoints(
 		monthEras,
 		false
@@ -203,6 +204,7 @@ const { relayWs, paraWs, seed } = program.opts()
 
 		relayApi.query.staking.currentEra(async (era) => {
 			logger.info(`era index: ${era.toString()}`)
+			logger.info('start to select new validators...')
 			await handler(account, relayApi, paraApi)
 		})
 	} catch (err) {

@@ -106,7 +106,7 @@
         },
         "Shortfalls": "FixedU128",
         "Surplus": "FixedU128",
-        "NomineeScoreCoefficients": {
+        "NomineeCoefficients": {
             "crf": "u32",
             "nf": "u32",
             "epf": "u32"

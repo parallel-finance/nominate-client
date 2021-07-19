@@ -112,7 +112,8 @@
             "epf": "u32"
         },
         "ValidatorInfo": {
-            "accountId": "AccountId",
+            "name": "Option<Text>",
+            "address": "AccountId",
             "stakes": "u128",
             "score": "u128"
         }

@@ -20,6 +20,7 @@ import { KeyringPair } from '@polkadot/keyring/types'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
+const relayNativeTokenDecimal = 1e12
 
 program
     .name('nominate-client')
@@ -132,14 +133,17 @@ const handler = async (
 
     validators = await Promise.all(
         validators.map(async (v) => {
+            const exposure = (
+                await relayApi.derive.staking.query(v.stashId, {
+                    withExposure: true,
+                })
+            ).exposure
+
             let nomination = Math.round(
-                (
-                    await relayApi.derive.staking.query(v.stashId, {
-                        withExposure: true,
-                    })
-                ).exposure.total
+                exposure.total
                     .toBn()
-                    .div(new BN(1e12))
+                    .sub(exposure.own.toBn())
+                    .div(new BN(relayNativeTokenDecimal))
                     .toNumber()
             )
 

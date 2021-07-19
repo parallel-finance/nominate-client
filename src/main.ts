@@ -10,7 +10,7 @@ import type {
 import type {
     ValidatorInfo,
     ValidatorIdentity,
-    NomineeScoreCoefficients,
+    NomineeCoefficients,
 } from './model'
 import { orderBy } from 'lodash'
 import { identity } from '@polkadot/types/interfaces/definitions'
@@ -139,17 +139,16 @@ const handler = async (
                 })
             ).exposure
 
+            let nominationBN = exposure.total.toBn().sub(exposure.own.toBn())
+
             let nomination = Math.round(
-                exposure.total
-                    .toBn()
-                    .sub(exposure.own.toBn())
-                    .div(new BN(relayNativeTokenDecimal))
-                    .toNumber()
+                nominationBN.div(new BN(relayNativeTokenDecimal)).toNumber()
             )
 
             return {
                 ...v,
                 nomination,
+                nominationBN,
                 avgEraPoints:
                     calculateAvgEraPoints(v.accountId, erasPointss) /
                     monthEras.length,
@@ -169,7 +168,7 @@ const handler = async (
         .map((v) => ({
             name: v.identity.display,
             address: v.accountId,
-            stakes: v.nomination || 0,
+            stakes: v.nominationBN || new BN(0),
             score: v.score || 0,
         }))
 

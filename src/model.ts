@@ -1,7 +1,7 @@
 import { RewardPoint } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
 
-export interface NomineeScoreCoefficients {
+export interface NomineeCoefficients {
     crf: number
     epf: number
     nf: number
@@ -17,6 +17,7 @@ export interface ValidatorInfo {
     stashId: string
     controllerId: string
     nomination?: number
+    nominationBN?: BN
     commissionRate: number
     blocked: boolean
     identity: ValidatorIdentity

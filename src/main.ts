@@ -135,7 +135,9 @@ const handler = async (
 
 	const allEras = await relayApi.derive.staking?.erasHistoric(false)
 	const monthEras = allEras.slice(-28)
+	logger.info(`last 28 eras: ${monthEras}`)
 
+	logger.info('retrieving slashes of last 28 eras...')
 	const slashes = await Promise.all(
 		monthEras.map(async (eraIndex) => {
 			return await relayApi.derive.staking.eraSlashes(eraIndex)

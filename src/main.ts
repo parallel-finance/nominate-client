@@ -188,7 +188,7 @@ const handler = async (
 	}))
 
 	const result = orderBy(validators, ['score', 'stakes'], ['desc', 'asc'])
-		.slice(-maxValidators)
+		.slice(0, +maxValidators)
 		.map((v) => ({
 			name: v.identity.display,
 			address: v.accountId,

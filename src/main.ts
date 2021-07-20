@@ -17,6 +17,7 @@ import { Hash } from '@polkadot/types/interfaces'
 const program = new Command()
 const commissionRateDecimal = 1e9
 const relayNativeTokenDecimal = 1e12
+const maxCommissionRate = 0.075 // 7.5%
 
 const logger = winston.createLogger({
 	level: 'info',
@@ -81,6 +82,11 @@ const calculateValidatorScore = (
 	const n = v.nomination
 	if (n === 0) {
 		// ignore new registered validators
+		return 0
+	}
+
+	if (cr > maxCommissionRate) {
+		// ignore high commission rate validators
 		return 0
 	}
 

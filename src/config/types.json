@@ -111,7 +111,8 @@
 			"address": "AccountId",
 			"stakes": "u128",
 			"score": "u128"
-		}
+		},
+		"ValidatorSet": "Vec<ValidatorInfo>"
 	},
 	"typesAlias": {
 		"tokens": {
@@ -163,7 +164,7 @@
 						"type": "AccountId"
 					}
 				],
-				"type": "(Shortfalls, Surplus)",
+				"type": "(Liquidity, Surplus)",
 				"isSubscription": false,
 				"jsonrpc": "loans_getAccountLiquidity",
 				"method": "getAccountLiquidity",

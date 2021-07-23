@@ -108,9 +108,7 @@ const handler = async (
 	paraApi: ApiPromise
 ): Promise<Hash> => {
 	const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
-	const coefficients = (
-		await paraApi.query.nomineeElection.coefficients()
-	).toJSON()
+	const coefficients = { crf: 100, nf: 1000, epf: 10 }
 
 	logger.info(
 		`maxValidators: ${maxValidators}, Coefficients: ${JSON.stringify(

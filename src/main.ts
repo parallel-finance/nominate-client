@@ -4,7 +4,7 @@ import type {
 	DeriveEraPoints,
 	DeriveEraSlashes
 } from '@polkadot/api-derive/types'
-import type { ValidatorInfo } from './model'
+import type { NomineeCoefficients, ValidatorInfo } from './model'
 import { orderBy } from 'lodash'
 import BN from 'bn.js'
 import { ApiPromise, Keyring } from '@polkadot/api'
@@ -73,7 +73,7 @@ const calculateAvgEraPointsOfAll = (erasPointss: DeriveEraPoints[]): number => {
 const calculateValidatorScore = (
 	v: ValidatorInfo,
 	slashes: DeriveEraSlashes[],
-	coefficients: any
+	coefficients: NomineeCoefficients
 ): number => {
 	const r = v.identity.hasIdentity && !v.blocked && v.identity.display ? 1 : 0
 	const cr = v.commissionRate
@@ -108,7 +108,7 @@ const handler = async (
 	paraApi: ApiPromise
 ): Promise<Hash> => {
 	const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
-	const coefficients = { crf: 100, nf: 1000, epf: 10 }
+	const coefficients: NomineeCoefficients = { crf: 100, nf: 1000, epf: 10 }
 
 	logger.info(
 		`maxValidators: ${maxValidators}, Coefficients: ${JSON.stringify(
@@ -219,7 +219,7 @@ const { relayWs, paraWs, seed, interactive } = program.opts()
 		const account = keyring.addFromMnemonic(
 			interactive
 				? (
-						await inquirer.prompt<any>([
+						await inquirer.prompt<{ seed: string }>([
 							{
 								type: 'password',
 								name: 'seed',

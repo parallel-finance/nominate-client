@@ -7,7 +7,7 @@
 		"build": "tsc",
 		"package": "pkg dist/main.js -t=node14-linux-x64 -o dist/nominate-client",
 		"start": "ts-node src/main.ts",
-		"format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+		"fmt": "prettier --config .prettierrc 'src/**/*.ts' --write",
 		"lint": "eslint . --ext .ts --fix"
 	},
 	"keywords": [],

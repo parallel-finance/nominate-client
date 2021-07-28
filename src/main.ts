@@ -44,12 +44,12 @@ program
 	.option(
 		'-p, --para-ws <string>',
 		'The Parachain API endpoint to connect to.',
-		'ws://127.0.0.1:9944'
+		'ws://127.0.0.1:9947'
 	)
 	.option(
 		'-r, --relay-ws <string>',
 		'The Relaychain API endpoint to connect to.',
-		'wss://kusama-rpc.polkadot.io'
+		'ws://127.0.0.1:9944'
 	)
 	.option(
 		'-t, --tick [number]',

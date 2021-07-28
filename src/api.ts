@@ -2,6 +2,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import jsonrpc from '@polkadot/types/interfaces/jsonrpc'
 import { rpc, types, typesAlias } from './config/types.json'
 
+export const onDisconnectedOrError = (): void => process.exit(1)
+
 export const connect = async (
 	relayWs: string,
 	paraWs: string
@@ -16,6 +18,9 @@ export const connect = async (
 		typesAlias,
 		rpc: { ...jsonrpc, ...rpc }
 	})
+
+	relayApi.on('disconnected', onDisconnectedOrError)
+	paraApi.on('disconnected', onDisconnectedOrError)
 
 	return { relayApi, paraApi }
 }

@@ -5,8 +5,7 @@ WORKDIR /nominate-client
 
 COPY . /nominate-client
 
-RUN yarn \
-    && yarn build
+RUN yarn && yarn build
 
 # ===== SECOND STAGE ======
 
@@ -20,4 +19,3 @@ RUN chmod +x /usr/local/lib/dist/main.js \
     && ln -s /usr/local/lib/dist/main.js /usr/local/bin/nominate-client
 
 ENTRYPOINT ["/usr/local/bin/nominate-client"]
-

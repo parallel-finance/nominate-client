@@ -1,4 +1,6 @@
-import { Command } from 'commander'
+#!/usr/bin/env node
+
+import commander, { Command } from 'commander'
 import { connect } from './api'
 import type {
 	DeriveEraPoints,
@@ -13,6 +15,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 import winston from 'winston'
 import inquirer from 'inquirer'
 import { Hash } from '@polkadot/types/interfaces'
+import interval from 'interval-promise'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
@@ -41,12 +44,17 @@ program
 	.option(
 		'-p, --para-ws <string>',
 		'The Parachain API endpoint to connect to.',
-		'ws://127.0.0.1:9944'
+		'ws://127.0.0.1:9947'
 	)
 	.option(
 		'-r, --relay-ws <string>',
 		'The Relaychain API endpoint to connect to.',
-		'wss://kusama-rpc.polkadot.io'
+		'ws://127.0.0.1:9944'
+	)
+	.option(
+		'-t, --tick [number]',
+		'The time interval in seconds to feed validators',
+		'120000'
 	)
 	.option('-s, --seed <string>', 'The account seed to use', '//Eve')
 	.option('-i, --interactive [boolean]', 'Input seed interactively', false)
@@ -210,9 +218,14 @@ const handler = async (
 	return callHash
 }
 
-const { relayWs, paraWs, seed, interactive } = program.opts()
+const { relayWs, paraWs, seed, tick, interactive } = program.opts()
 ;(async () => {
 	try {
+		const tickInt = +tick
+		if (isNaN(tickInt)) {
+			throw new commander.InvalidArgumentError('Tick not a number.')
+		}
+
 		await cryptoWaitReady()
 
 		const keyring = new Keyring({ type: 'sr25519' })
@@ -236,11 +249,17 @@ const { relayWs, paraWs, seed, interactive } = program.opts()
 
 		const { relayApi, paraApi } = await connect(relayWs, paraWs)
 
-		relayApi.query.staking.currentEra(async (era) => {
-			logger.info(`era index: ${era.toString()}`)
-			logger.info('start to select new validators...')
-			await handler(account, relayApi, paraApi)
-		})
+		interval(
+			async () => {
+				logger.info('========= new round ==========')
+				const era = await relayApi.query.staking.currentEra()
+				logger.info(`era index: ${era.toString()}`)
+				logger.info('start to select new validators...')
+				await handler(account, relayApi, paraApi)
+			},
+			tickInt,
+			{ stopOnError: false }
+		)
 	} catch (err) {
 		logger.error(`error happened: ${err.message}`)
 	}

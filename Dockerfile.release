@@ -1,0 +1,21 @@
+FROM node:14.17.0 as builder
+LABEL description="This is the build stage for nominate client. Here we create the dist."
+
+WORKDIR /nominate-client
+
+COPY . /nominate-client
+
+RUN yarn && yarn build
+
+# ===== SECOND STAGE ======
+
+FROM node:14.17.0
+LABEL description="This is the 2nd stage: a very small image where we copy the nominate client."
+
+COPY --from=builder /nominate-client/dist /usr/local/lib/dist
+COPY --from=builder /nominate-client/node_modules /usr/local/lib/node_modules
+
+RUN chmod +x /usr/local/lib/dist/main.js \
+    && ln -s /usr/local/lib/dist/main.js /usr/local/bin/nominate-client
+
+ENTRYPOINT ["/usr/local/bin/nominate-client"]

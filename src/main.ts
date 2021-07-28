@@ -54,7 +54,7 @@ program
 	.option(
 		'-t, --tick [number]',
 		'The time interval in seconds to feed validators',
-		'600000'
+		'120000'
 	)
 	.option('-s, --seed <string>', 'The account seed to use', '//Eve')
 	.option('-i, --interactive [boolean]', 'Input seed interactively', false)

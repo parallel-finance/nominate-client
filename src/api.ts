@@ -1,6 +1,5 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
-import jsonrpc from '@polkadot/types/interfaces/jsonrpc'
-import { rpc, types, typesAlias } from './config/types.json'
+import { options } from '@parallel-finance/api'
 
 export const onDisconnectedOrError = (): void => process.exit(1)
 
@@ -12,12 +11,9 @@ export const connect = async (
 		provider: new WsProvider(relayWs)
 	})
 
-	const paraApi = await ApiPromise.create({
-		provider: new WsProvider(paraWs),
-		types,
-		typesAlias,
-		rpc: { ...jsonrpc, ...rpc }
-	})
+	const paraApi = await ApiPromise.create(
+		options({ provider: new WsProvider(paraWs) })
+	)
 
 	relayApi.on('disconnected', onDisconnectedOrError)
 	paraApi.on('disconnected', onDisconnectedOrError)

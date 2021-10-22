@@ -2,9 +2,11 @@ name: Docker Image
 
 on:
     push:
-        branches: [main]
+        branches: [master]
         tags:
             - 'v*'
+            - 'staging*'
+            - 'qa*'
 
 jobs:
     dockerimage:

@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import commander, { Command } from 'commander'
 import { connect } from './api'
 import type {

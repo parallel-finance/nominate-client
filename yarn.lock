@@ -144,29 +144,29 @@
   dependencies:
     "@open-web3/orml-type-definitions" "1.0.2-0"
 
-"@parallel-finance/api@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.npmmirror.com/@parallel-finance/api/download/@parallel-finance/api-1.4.1.tgz#d4486ceaf793da6191b699c8c2e326ed1b7e1d08"
-  integrity sha1-1Ehs6veT2mGRtpnIwuMm7Rt+HQg=
+"@parallel-finance/api@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/api/-/api-1.4.2.tgz#c7002859a994bceb0b8b938048c439c90e80b574"
+  integrity sha512-Raa3qR3uQFu9/91Yxcwi1qgX/4pKIDaqh9Dy+EhyyhAFNAQClhRxBBErAyklRLPWJsdAe51s5I/jVhtG9Lp1dg==
   dependencies:
     "@open-web3/orml-api-derive" "^1.0.2-0"
-    "@parallel-finance/types" "1.4.1"
+    "@parallel-finance/types" "1.4.2"
 
-"@parallel-finance/type-definitions@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.npmmirror.com/@parallel-finance/type-definitions/download/@parallel-finance/type-definitions-1.4.1.tgz#aed4d5adfa931d17ddd492bb02d5c10097a4a4c6"
-  integrity sha1-rtTVrfqTHRfd1JK7AtXBAJekpMY=
+"@parallel-finance/type-definitions@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/type-definitions/-/type-definitions-1.4.2.tgz#5c27e23d48d805051c0e798293ff60a01c9ba01b"
+  integrity sha512-bS9GODfgoBDEkY8lSGQ0/el72MKDJ5cUjKgUtf6dTPReBw8q18ZJeBnnWuu8TmZSlsNdK3snjPpn128Q+OUCNw==
   dependencies:
     "@open-web3/orml-type-definitions" "^1.0.2-0"
 
-"@parallel-finance/types@1.4.1", "@parallel-finance/types@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.npmmirror.com/@parallel-finance/types/download/@parallel-finance/types-1.4.1.tgz#81b6e2ac246c0654c2ef8d4adfb609736cab3ed0"
-  integrity sha1-gbbirCRsBlTC741K37YJc2yrPtA=
+"@parallel-finance/types@1.4.2", "@parallel-finance/types@^1.4.2":
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/types/-/types-1.4.2.tgz#451669cf74711629ede469fc64fa07408c6d4e9b"
+  integrity sha512-EjRbpA2I2A+qBVOiM9GyeV8zcD788el5e5HB9y3xiukBXkX6UAW1XOp1gwrPDVPJSW1bKbwxacST6j3CkVeOzg==
   dependencies:
     "@babel/runtime" "^7.10.2"
     "@open-web3/orml-types" "^1.0.2-0"
-    "@parallel-finance/type-definitions" "^1.4.1"
+    "@parallel-finance/type-definitions" "^1.4.2"
 
 "@polkadot/api-derive@6.4.2", "@polkadot/api-derive@^6.3.1":
   version "6.4.2"

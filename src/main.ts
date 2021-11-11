@@ -42,7 +42,7 @@ program
 	.option(
 		'-p, --para-ws <string>',
 		'The Parachain API endpoint to connect to.',
-		'ws://127.0.0.1:9947'
+		'ws://127.0.0.1:9948'
 	)
 	.option(
 		'-r, --relay-ws <string>',

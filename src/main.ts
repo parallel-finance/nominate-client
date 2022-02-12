@@ -17,7 +17,6 @@ import interval from 'interval-promise'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
-const relayNativeTokenDecimal = 1e12
 const maxCommissionRate = 0.075 // 7.5%
 
 const logger = winston.createLogger({
@@ -175,7 +174,13 @@ const handler = async (
 			const nominationBN = exposure.total.toBn().sub(exposure.own.toBn())
 
 			const nomination = nominationBN
-				.div(new BN(relayNativeTokenDecimal))
+				.div(
+					new BN(
+						(await relayApi.rpc.system.properties()).tokenDecimals
+							.unwrap()[0]
+							.toNumber()
+					)
+				)
 				.toNumber()
 
 			return {

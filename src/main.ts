@@ -111,7 +111,7 @@ const handler = async (
 	account: KeyringPair,
 	relayApi: ApiPromise,
 	paraApi: ApiPromise
-): Promise<Hash> => {
+): Promise<void> => {
 	const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
 	const coefficients: NomineeCoefficients = { crf: 100, nf: 1000, epf: 10 }
 
@@ -212,13 +212,20 @@ const handler = async (
 		}))
 
 	logger.info(`submitting selected validators...`)
-	const tx = await paraApi.tx.nomineeElection
+	await paraApi.tx.nomineeElection
 		.setValidators(result)
-		.signAsync(account)
+		.signAndSend(account, {
+			nonce: await paraApi.rpc.system.accountNextIndex(account.address)
+		})
 
-	const callHash = await tx.send()
-	logger.info(`call hash: ${callHash}, finished!`)
-	return callHash
+	logger.info(`nominating validators...`)
+	await paraApi.tx.liquidStaking
+		.nominate(result.map((v) => v.address))
+		.signAndSend(account, {
+			nonce: await paraApi.rpc.system.accountNextIndex(account.address)
+		})
+
+	logger.info(`done!`)
 }
 
 const { relayWs, paraWs, seed, tick, interactive } = program.opts()

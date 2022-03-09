@@ -14,6 +14,7 @@ import winston from 'winston'
 import inquirer from 'inquirer'
 import { Hash } from '@polkadot/types/interfaces'
 import interval from 'interval-promise'
+import { u16 } from '@polkadot/types'
 
 const program = new Command()
 const commissionRateDecimal = 1e9
@@ -219,8 +220,13 @@ const handler = async (
 		})
 
 	logger.info(`nominating validators...`)
+	const derivativeIndex = paraApi.consts.liquidStaking
+		.derivativeIndex as unknown as u16
 	await paraApi.tx.liquidStaking
-		.nominate(result.map((v) => v.address))
+		.nominate(
+			derivativeIndex,
+			result.map((v) => v.address)
+		)
 		.signAndSend(account, {
 			nonce: await paraApi.rpc.system.accountNextIndex(account.address)
 		})

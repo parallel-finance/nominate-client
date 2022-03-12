@@ -28,8 +28,8 @@
 		"typescript": "^4.3.5"
 	},
 	"dependencies": {
-		"@parallel-finance/api": "^1.5.4",
-		"@parallel-finance/types": "^1.5.4",
+		"@parallel-finance/api": "^1.5.7",
+		"@parallel-finance/types": "^1.5.7",
 		"@polkadot/api": "^7.9.1",
 		"@polkadot/api-derive": "^7.9.1",
 		"@polkadot/keyring": "^8.4.1",

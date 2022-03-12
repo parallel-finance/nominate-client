@@ -161,29 +161,29 @@
   dependencies:
     "@open-web3/orml-type-definitions" "1.0.2-3"
 
-"@parallel-finance/api@^1.5.4":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@parallel-finance/api/-/api-1.5.5.tgz#ab1381534eff80909ef58b7c338085841b439d11"
-  integrity sha512-QhSekJ591Xha/WCAqtp9ozeBAMPnN0wEtrC8DVf0CS/kgp8FxnM9ZHvqSIofIyrgt0DlJBDYn7yPv/6rk973gA==
+"@parallel-finance/api@^1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/api/-/api-1.5.7.tgz#77b956b2bc6c1cf798db8370ba733e45a3fcabd5"
+  integrity sha512-6QdAvWQANIc3Ks4Isb7cEvB8AT1L6XaCt1xFR5+qHC64/2DOYWh4CBOVPpinmoICf+86aH3UwRnDrcCpG9ycvg==
   dependencies:
     "@open-web3/orml-api-derive" "^1.0.2-3"
-    "@parallel-finance/types" "^1.5.5"
+    "@parallel-finance/types" "^1.5.7"
 
-"@parallel-finance/type-definitions@^1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@parallel-finance/type-definitions/-/type-definitions-1.5.5.tgz#f4a8c6dcc4784161f096cedccae26375d5d020ee"
-  integrity sha512-sV+N+pdGB6UwyYjM1IEx+/Xm/SwMgPHi+xu7rQqh4ZDZgeaaC/IK8NBAMoeWYyNi1EA6EdAkXHZ7A3sALdfMJQ==
+"@parallel-finance/type-definitions@^1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/type-definitions/-/type-definitions-1.5.7.tgz#07f2d8a2c681af0dff45a76c2c334a6ffec2546b"
+  integrity sha512-EU2OI18MZ1PxrBjbECvbP5a3KJxVrdX6r+9FF/UZXPzwjnFw2phB+3c/2JKJi8G7pyRv15w15btkWHoEIt+wXg==
   dependencies:
     "@open-web3/orml-type-definitions" "^1.0.2-3"
 
-"@parallel-finance/types@^1.5.4", "@parallel-finance/types@^1.5.5":
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/@parallel-finance/types/-/types-1.5.5.tgz#ec8c28bf5548b9c3eb12ff5169681d1a8efc0ccf"
-  integrity sha512-6TqqOU3X/ZRXIv467gPYP9y9ZRjAzqKgXzKiDoXc4DcokMxcW+PwJRlt6RL6vZ/yLJV3ALJRHlg7IUNVzoPNEQ==
+"@parallel-finance/types@^1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@parallel-finance/types/-/types-1.5.7.tgz#98cedabe2c797daaade17929386a328c9e46c9d0"
+  integrity sha512-9E9dVIck/wLqtMkgYAhfhPgPKaq+kOJtHfSy6ddzV99MJuRy9UOVVp+LphondZCxWsIXA+vThv5zyTRdIP6mxQ==
   dependencies:
     "@babel/runtime" "^7.10.2"
     "@open-web3/orml-types" "^1.0.2-3"
-    "@parallel-finance/type-definitions" "^1.5.5"
+    "@parallel-finance/type-definitions" "^1.5.7"
 
 "@polkadot/api-augment@7.11.1":
   version "7.11.1"

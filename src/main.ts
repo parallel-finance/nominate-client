@@ -13,7 +13,8 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 import winston from 'winston'
 import inquirer from 'inquirer'
 import interval from 'interval-promise'
-import { u16 } from '@polkadot/types'
+import { Option, u16 } from '@polkadot/types'
+import { EraIndex } from '@polkadot/types/interfaces'
 
 const program = new Command()
 const maxValidators = 16
@@ -211,13 +212,24 @@ const handler = async (
 			score: v.score || 0
 		}))
 
+	const newValidators = result.map((v) => v.address)
+
 	logger.info(`nominating validators...`)
 	const derivativeIndex = paraApi.consts.liquidStaking
 		.derivativeIndex as unknown as u16
 	await paraApi.tx.liquidStaking
-		.nominate(
-			derivativeIndex,
-			result.map((v) => v.address)
+		.nominate(derivativeIndex, newValidators)
+		.signAndSend(account, {
+			nonce: await paraApi.rpc.system.accountNextIndex(account.address)
+		})
+
+	logger.info(`payout stakers...`)
+	const era = (
+		(await relayApi.query.staking.currentEra()) as unknown as Option<EraIndex>
+	).unwrapOr(0)
+	await relayApi.tx.utility
+		.batchAll(
+			newValidators.map((v) => relayApi.tx.staking.payoutStakers(v, era))
 		)
 		.signAndSend(account, {
 			nonce: await paraApi.rpc.system.accountNextIndex(account.address)

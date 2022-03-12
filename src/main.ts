@@ -212,13 +212,6 @@ const handler = async (
 			score: v.score || 0
 		}))
 
-	logger.info(`submitting selected validators...`)
-	await paraApi.tx.nomineeElection
-		.setValidators(result)
-		.signAndSend(account, {
-			nonce: await paraApi.rpc.system.accountNextIndex(account.address)
-		})
-
 	logger.info(`nominating validators...`)
 	const derivativeIndex = paraApi.consts.liquidStaking
 		.derivativeIndex as unknown as u16

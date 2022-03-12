@@ -12,11 +12,11 @@ import { KeyringPair } from '@polkadot/keyring/types'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import winston from 'winston'
 import inquirer from 'inquirer'
-import { Hash } from '@polkadot/types/interfaces'
 import interval from 'interval-promise'
 import { u16 } from '@polkadot/types'
 
 const program = new Command()
+const maxValidators = 16
 const commissionRateDecimal = 1e9
 const maxCommissionRate = 0.075 // 7.5%
 
@@ -113,7 +113,6 @@ const handler = async (
 	relayApi: ApiPromise,
 	paraApi: ApiPromise
 ): Promise<void> => {
-	const maxValidators = paraApi.consts.nomineeElection.maxValidators.toJSON()
 	const coefficients: NomineeCoefficients = { crf: 100, nf: 1000, epf: 10 }
 
 	logger.info(
@@ -252,9 +251,9 @@ const { relayWs, paraWs, seed, tick, interactive } = program.opts()
 				: seed
 		)
 
-		logger.info(`feeder: ${account.address}`)
-		logger.info(`initializing connection to relaychain: ${relayWs}`)
-		logger.info(`initializing connection to parachain: ${paraWs}`)
+		logger.info(`connecting to relaychain: ${relayWs}`)
+		logger.info(`connecting to parachain: ${paraWs}`)
+		logger.info(`account: ${account.address}`)
 
 		const { relayApi, paraApi } = await connect(relayWs, paraWs)
 
